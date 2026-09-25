@@ -11,7 +11,7 @@ The game flow is simple:
 - player two joins with a private invite link, invite token, or direct-match join URL
 - both players share a 16x16 board with 51 mines
 - first to 26 claimed mines wins
-- each player gets one 5x5 bomb comeback move that unlocks only while trailing by 4 or more
+- each player gets one 5x5 bomb comeback move that unlocks only while trailing by 1 or more
 - room chat stays with the room through reconnects and rematches
 
 > **Terminology.** "Direct match" is the user-facing product name for the browser-to-browser build. "P2P" (or `p2p`) is the matching technical mode name and the value of `VITE_DEPLOYMENT_MODE`. They refer to the same thing.

@@ -1,6 +1,6 @@
 import type { MatchState } from "./match.types.js";
 
-export const MIN_BOMB_DEFICIT = 4;
+export const MIN_BOMB_DEFICIT = 1;
 
 export const incrementPlayerScore = (
   state: MatchState,
