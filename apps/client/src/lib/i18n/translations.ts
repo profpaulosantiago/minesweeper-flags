@@ -122,7 +122,8 @@ const en: TranslationDictionary = {
     matchTied: "Match tied."
   },
   board: {
-    cellTitle: "Row {row}, Column {column}"
+    cellTitle: "Row {row}, Column {column}",
+    opponentLastMoveCellTitle: "Row {row}, Column {column} — opponent's last move"
   },
   room: {
     starting: "Starting",
@@ -341,7 +342,8 @@ const ptBR: TranslationDictionary = {
     matchTied: "Partida empatada."
   },
   board: {
-    cellTitle: "Linha {row}, Coluna {column}"
+    cellTitle: "Linha {row}, Coluna {column}",
+    opponentLastMoveCellTitle: "Linha {row}, Coluna {column} — última jogada do adversário"
   },
   room: {
     starting: "Iniciando",

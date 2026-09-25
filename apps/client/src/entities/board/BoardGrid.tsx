@@ -4,11 +4,18 @@ import { FlagIcon } from "../../shared-ui/FlagIcon.js";
 import { useTranslation } from "../../lib/i18n/useTranslation.js";
 import { getBombPreviewBounds } from "./bomb-preview.js";
 
+interface OpponentLastMove {
+  row: number;
+  column: number;
+  tone: "blue" | "red";
+}
+
 interface BoardGridProps {
   match: MatchStateDto;
   canAct: boolean;
   bombArmed: boolean;
   playerTones: Record<string, "blue" | "red">;
+  opponentLastMove?: OpponentLastMove | null;
   onSelectCell: (row: number, column: number) => void;
 }
 
@@ -43,6 +50,7 @@ export const BoardGrid = ({
   canAct,
   bombArmed,
   playerTones,
+  opponentLastMove = null,
   onSelectCell
 }: BoardGridProps) => {
   const { t } = useTranslation();
@@ -92,6 +100,11 @@ export const BoardGrid = ({
           cell.column >= previewBounds.minColumn &&
           cell.column <= previewBounds.maxColumn;
 
+        const isOpponentLastMove =
+          opponentLastMove !== null &&
+          opponentLastMove.row === cell.row &&
+          opponentLastMove.column === cell.column;
+
         return (
           <button
             key={`${cell.row}-${cell.column}`}
@@ -104,7 +117,9 @@ export const BoardGrid = ({
               isPreviewed ? "bomb-preview-cell" : "",
               isPreviewed && hoveredCell?.row === cell.row && hoveredCell?.column === cell.column
                 ? "bomb-preview-center"
-                : ""
+                : "",
+              isOpponentLastMove ? "is-opponent-last-move" : "",
+              isOpponentLastMove ? `is-opponent-last-move-${opponentLastMove.tone}` : ""
             ]
               .filter(Boolean)
               .join(" ")}
@@ -125,7 +140,11 @@ export const BoardGrid = ({
                 setHoveredCell(null);
               }
             }}
-            title={t("board.cellTitle", { row: cell.row + 1, column: cell.column + 1 })}
+            title={
+              isOpponentLastMove
+                ? t("board.opponentLastMoveCellTitle", { row: cell.row + 1, column: cell.column + 1 })
+                : t("board.cellTitle", { row: cell.row + 1, column: cell.column + 1 })
+            }
           >
             {renderCellContent(
               cell.status,

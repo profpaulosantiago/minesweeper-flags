@@ -69,6 +69,14 @@ export const MatchView = ({
     match.currentTurnPlayerId && playerTones[match.currentTurnPlayerId]
       ? playerTones[match.currentTurnPlayerId]
       : "blue";
+  const opponentLastMove =
+    match.lastAction && match.lastAction.playerId !== currentPlayerId
+      ? {
+          row: match.lastAction.row,
+          column: match.lastAction.column,
+          tone: playerTones[match.lastAction.playerId] ?? "blue"
+        }
+      : null;
   const playerSlots = [
     {
       title: t("common.blueLabel"),
@@ -242,6 +250,7 @@ export const MatchView = ({
                 canAct={canAct}
                 bombArmed={bombArmed}
                 playerTones={playerTones}
+                opponentLastMove={opponentLastMove}
                 onSelectCell={onCellSelect}
               />
             </div>

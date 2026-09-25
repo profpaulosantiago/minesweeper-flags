@@ -1700,6 +1700,32 @@ button {
     inset 0 0 22px rgba(255, 255, 255, 0.32);
 }
 
+/* Marks the cell the opponent last played, so it stays easy to spot on a
+   16x16 board even after several moves. Tone-colored ring matches the flag
+   colors (FlagIcon.tsx) so it reads as "their" move at a glance. */
+.board-cell.is-opponent-last-move {
+  z-index: 2;
+}
+
+.board-cell.is-opponent-last-move::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 2px;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 2px var(--last-move-ring-color, rgba(0, 0, 0, 0.5)),
+    0 0 8px 1px var(--last-move-ring-color, rgba(0, 0, 0, 0.5));
+}
+
+.board-cell.is-opponent-last-move-blue {
+  --last-move-ring-color: #2e49c6;
+}
+
+.board-cell.is-opponent-last-move-red {
+  --last-move-ring-color: #f25131;
+}
+
 .cell-number {
   font-size: 1.28rem;
   line-height: 1;
