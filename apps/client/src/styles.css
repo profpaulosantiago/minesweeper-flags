@@ -1860,12 +1860,120 @@ button {
   }
 
   .classic-match-chat {
-    height: 276px;
-    min-height: 276px;
+    height: 828px;
+    min-height: 828px;
   }
 
   .classic-main-shell {
     width: 100%;
+  }
+
+  /* Compact, two-column scoreboard: room name + turn counter on one row,
+     blue/red panels side by side, then the resign button — all kept small
+     enough that the board is visible without scrolling past the scoreboard
+     on a typical 9:16 phone screen. Desktop layout (168px vertical sidebar)
+     is untouched above. */
+  .classic-sidebar-frame {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "strip strip"
+      "blue red"
+      "resign resign";
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .sidebar-player-panel-blue {
+    grid-area: blue;
+  }
+
+  .sidebar-player-panel-red {
+    grid-area: red;
+  }
+
+  .sidebar-center-strip {
+    grid-area: strip;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sidebar-resign-button {
+    grid-area: resign;
+    margin: 0;
+    min-height: 30px;
+  }
+
+  /* Room name first (left), turn counter on the same line (right).
+     The status pill ("VEZ DO ..." / turn indicator) is dropped on mobile
+     since each panel already states its own turn status below. */
+  .room-code-pill {
+    order: 1;
+    margin: 0;
+    text-align: left;
+  }
+
+  .star-meter {
+    order: 2;
+    margin: 0;
+    padding: 3px 10px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+
+  .move-pill {
+    display: none;
+  }
+
+  .sidebar-player-header {
+    padding: 4px 6px 1px;
+  }
+
+  .sidebar-player-title {
+    font-size: 0.76rem;
+  }
+
+  .sidebar-player-avatar {
+    width: 28px;
+    height: 28px;
+    margin: 2px auto;
+    font-size: 0.92rem;
+  }
+
+  .sidebar-player-name {
+    font-size: 0.72rem;
+    padding: 0 6px;
+  }
+
+  .sidebar-player-connection {
+    margin-top: 1px;
+  }
+
+  .sidebar-score-strip {
+    margin: 4px 6px 0;
+    gap: 4px;
+    grid-template-columns: 1fr 30px;
+  }
+
+  .sidebar-pill {
+    min-height: 26px;
+  }
+
+  .sidebar-score-pill {
+    font-size: 1rem;
+    gap: 4px;
+  }
+
+  .sidebar-turn-box {
+    margin: 3px 6px 4px;
+    padding: 4px 5px;
+  }
+
+  .sidebar-turn-box p {
+    font-size: 0.64rem;
+    line-height: 1.08;
   }
 }
 
