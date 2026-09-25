@@ -6,6 +6,7 @@ import {
 import { BoardGrid } from "../../entities/board/BoardGrid.js";
 import { BombIcon } from "../../shared-ui/BombIcon.js";
 import { FlagIcon } from "../../shared-ui/FlagIcon.js";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
 import { ChatPanel } from "../chat/ChatPanel.js";
 import { RematchPanel } from "../rematch/RematchPanel.js";
 
@@ -48,6 +49,7 @@ export const MatchView = ({
   onRequestRematch,
   onCancelRematch
 }: MatchViewProps) => {
+  const { t } = useTranslation();
   const [bluePlayer, redPlayer] = match.players;
   const currentPlayer = match.players.find((player) => player.playerId === currentPlayerId) ?? null;
   const opponent = match.players.find((player) => player.playerId !== currentPlayerId) ?? null;
@@ -69,14 +71,14 @@ export const MatchView = ({
       : "blue";
   const playerSlots = [
     {
-      title: "BLUE",
+      title: t("common.blueLabel"),
       tone: "blue" as const,
       player: bluePlayer,
       isSelf: bluePlayer.playerId === currentPlayerId,
       isTurn: match.currentTurnPlayerId === bluePlayer.playerId
     },
     {
-      title: "RED",
+      title: t("common.redLabel"),
       tone: "red" as const,
       player: redPlayer,
       isSelf: redPlayer.playerId === currentPlayerId,
@@ -101,7 +103,7 @@ export const MatchView = ({
       */}
       <header className="sidebar-player-header">
         <span className="sidebar-player-title">{slot.title}</span>
-        <span className="sidebar-player-role">{slot.isSelf ? "YOU" : "OPPONENT"}</span>
+        <span className="sidebar-player-role">{slot.isSelf ? t("match.youRole") : t("match.opponentRole")}</span>
       </header>
 
       <div className="sidebar-player-avatar">
@@ -110,7 +112,7 @@ export const MatchView = ({
 
       <p className="sidebar-player-name">{slot.player.displayName}</p>
       <p className="sidebar-player-connection">
-        {slot.player.connected ? "Connected" : "Disconnected"}
+        {slot.player.connected ? t("common.connected") : t("common.disconnected")}
       </p>
 
       <div className="sidebar-score-strip">
@@ -129,14 +131,16 @@ export const MatchView = ({
                   : "idle";
           const bombLabel =
             slot.player.bombsRemaining === 0
-              ? `${slot.isSelf ? "Your" : "Opponent"} bomb is spent.`
+              ? slot.isSelf
+                ? t("match.yourBombSpent")
+                : t("match.opponentBombSpent")
               : slot.isSelf && canAct && canBomb
                 ? bombArmed
-                  ? "Bomb armed. Pick the center of a 5x5 blast."
-                  : "Bomb ready. Click to arm a 5x5 blast."
+                  ? t("match.bombArmedPickCenterAria")
+                  : t("match.bombReadyClickToArmAria")
                 : slot.isSelf
-                  ? `Bomb unused. It becomes available while trailing by ${MIN_BOMB_DEFICIT} or more on your turn.`
-                  : "Opponent bomb status.";
+                  ? t("match.bombUnusedTrailing", { deficit: MIN_BOMB_DEFICIT })
+                  : t("match.opponentBombStatus");
 
           return (
             <button
@@ -153,8 +157,8 @@ export const MatchView = ({
               disabled={!slot.isSelf || !canAct || !canBomb}
               title={
                 slot.isSelf && canAct && canBomb
-                  ? "Bomb ready: click to arm a 5x5 blast."
-                  : `Bomb: one use only, and only while trailing by ${MIN_BOMB_DEFICIT} or more.`
+                  ? t("match.bombReadyClickToArmTitle")
+                  : t("match.bombOneUseTitle", { deficit: MIN_BOMB_DEFICIT })
               }
             >
               <BombIcon className="sidebar-bomb-icon" variant={bombVariant} size={19} />
@@ -167,27 +171,27 @@ export const MatchView = ({
         {match.phase === "finished" ? (
           <p>
             {match.winnerPlayerId === slot.player.playerId
-              ? "Winner"
+              ? t("match.winner")
               : match.winnerPlayerId
-                ? "Defeated"
-              : "Draw"}
+                ? t("match.defeated")
+              : t("match.draw")}
           </p>
         ) : slot.isSelf ? (
           <p>
             {slot.isTurn
               ? bombArmed
-                ? "Bomb armed.\nPick center."
+                ? t("match.bombArmedPickCenterShort")
                 : canBomb
-                  ? "It's your turn!\nBomb ready."
+                  ? t("match.yourTurnBombReady")
                   : scoreDeficit > 0 && scoreDeficit < MIN_BOMB_DEFICIT
-                    ? `It's your turn!\nBomb unlocks at down ${MIN_BOMB_DEFICIT}.`
-                    : "It's your turn!\nMake a move."
-              : "Wait your turn."}
+                    ? t("match.yourTurnBombUnlocksAt", { deficit: MIN_BOMB_DEFICIT })
+                    : t("match.yourTurnMakeMove")
+              : t("match.waitYourTurn")}
           </p>
         ) : slot.isTurn ? (
-          <p>{`${slot.title} is moving.`}</p>
+          <p>{t("match.playerIsMoving", { name: slot.title })}</p>
         ) : (
-          <p>{`${slot.title} is waiting.`}</p>
+          <p>{t("match.playerIsWaiting", { name: slot.title })}</p>
         )}
       </div>
     </section>
@@ -205,9 +209,13 @@ export const MatchView = ({
               <strong>{match.turnNumber}</strong>
               <span className="star-glyph">★</span>
             </div>
-            <div className="room-code-pill">Room {roomCode}</div>
+            <div className="room-code-pill">{t("common.roomLabel", { roomCode })}</div>
             <div className={`move-pill move-pill-${activeTone}`}>
-              {match.phase === "finished" ? "MATCH OVER" : `${activeTone.toUpperCase()} MOVE`}
+              {match.phase === "finished"
+                ? t("match.matchOver")
+                : t("match.moveLabel", {
+                    tone: activeTone === "blue" ? t("common.blueLabel") : t("common.redLabel")
+                  })}
             </div>
           </div>
 
@@ -217,12 +225,12 @@ export const MatchView = ({
             className="sidebar-resign-button"
             disabled={match.phase !== "live"}
             onClick={() => {
-              if (window.confirm("Resign this match?")) {
+              if (window.confirm(t("match.resignConfirm"))) {
                 onResign();
               }
             }}
           >
-            RESIGN
+            {t("match.resign")}
           </button>
         </aside>
 
@@ -260,8 +268,11 @@ export const MatchView = ({
           error={chatError}
           helperText={
             opponent
-              ? `${opponent.displayName} is ${opponent.connected ? "online" : "offline"}.`
-              : "Waiting for the second player to join chat."
+              ? t("match.opponentStatusLine", {
+                  name: opponent.displayName,
+                  status: opponent.connected ? t("common.online") : t("common.offline")
+                })
+              : t("match.waitingForSecondPlayer")
           }
           className="classic-match-chat"
           onDraftChange={onChatDraftChange}

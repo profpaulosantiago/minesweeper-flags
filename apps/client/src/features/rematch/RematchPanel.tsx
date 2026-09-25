@@ -1,4 +1,5 @@
 import type { MatchStateDto } from "@minesweeper-flags/shared";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
 
 interface RematchPanelProps {
   match: MatchStateDto;
@@ -13,6 +14,7 @@ export const RematchPanel = ({
   onRequestRematch,
   onCancelRematch
 }: RematchPanelProps) => {
+  const { t } = useTranslation();
   const currentPlayer = match.players.find((player) => player.playerId === currentPlayerId);
   const opponent = match.players.find((player) => player.playerId !== currentPlayerId) ?? null;
 
@@ -23,19 +25,19 @@ export const RematchPanel = ({
   const isWaitingForOpponent = currentPlayer.rematchRequested;
   const isOpponentWaiting = !currentPlayer.rematchRequested && Boolean(opponent?.rematchRequested);
   const rematchMessage = isWaitingForOpponent
-    ? "Waiting for the other player to confirm the rematch."
+    ? t("rematch.waitingForOtherPlayer")
     : isOpponentWaiting
-      ? "The other player requested a rematch. Confirm to start the next round."
-      : "Ready to queue another round in the same room?";
+      ? t("rematch.otherPlayerRequested")
+      : t("rematch.readyToQueue");
   const rematchActionLabel = isWaitingForOpponent
-    ? "Cancel Rematch"
+    ? t("rematch.cancelRematch")
     : isOpponentWaiting
-      ? "Accept Rematch"
-      : "Request Rematch";
+      ? t("rematch.acceptRematch")
+      : t("rematch.requestRematch");
 
   return (
     <section className="panel rematch-panel">
-      <p>{match.winnerPlayerId ? "Match over." : "Match tied."}</p>
+      <p>{match.winnerPlayerId ? t("rematch.matchOver") : t("rematch.matchTied")}</p>
       <p>{rematchMessage}</p>
       <div className="action-row">
         {isWaitingForOpponent ? (

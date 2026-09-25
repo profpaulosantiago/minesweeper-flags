@@ -6,28 +6,32 @@ import { MatchView } from "../features/match/MatchView.js";
 import { LobbyPreviewPanel } from "../features/room/LobbyPreviewPanel.js";
 import { buildInvitePath } from "../features/room/invite-link.js";
 import { DEPLOYMENT_MODE } from "../lib/config/env.js";
+import { useTranslation } from "../lib/i18n/useTranslation.js";
+import { translateServerMessage, t as translate } from "../lib/i18n/i18n-store.js";
 
-const formatSetupStage = (stage: string | null | undefined): string => {
+type Translate = typeof translate;
+
+const formatSetupStage = (t: Translate, stage: string | null | undefined): string => {
   if (!stage) {
-    return "Starting";
+    return t("room.starting");
   }
 
   switch (stage) {
     case "creating-offer":
     case "creating-session":
-      return "Creating Direct Link";
+      return t("room.creatingDirectLink");
     case "waiting-for-guest":
-      return "Waiting For Guest";
+      return t("room.waitingForGuest");
     case "applying-answer":
-      return "Connecting To Guest";
+      return t("room.connectingToGuest");
     case "connecting":
-      return "Connecting";
+      return t("common.connecting");
     case "connected":
-      return "Connected";
+      return t("common.connected");
     case "failed":
-      return "Setup Failed";
+      return t("room.setupFailed");
     case "closed":
-      return "Closed";
+      return t("room.closed");
     default:
       return stage.replace(/-/g, " ");
   }
@@ -42,73 +46,82 @@ const isRecoveryUnavailableError = (error: string | null): boolean =>
 const isClaimVictoryError = (error: string | null): boolean =>
   error !== null && (error.includes("now have control") || error.includes("now have an active claim"));
 
-const getHostSetupHeadline = (stage: string | null | undefined): string => {
+const getHostSetupHeadline = (t: Translate, stage: string | null | undefined): string => {
   switch (stage) {
     case "waiting-for-guest":
-      return "Waiting For Guest";
+      return t("room.waitingForGuest");
     case "applying-answer":
     case "connecting":
-      return "Connecting To Guest";
+      return t("room.connectingToGuest");
     case "connected":
-      return "Direct Match Ready";
+      return t("room.directMatchReady");
     case "failed":
-      return "Direct Match Failed";
+      return t("room.directMatchFailed");
     case "closed":
-      return "Direct Match Closed";
+      return t("room.directMatchClosed");
     default:
-      return "Preparing Direct Match";
+      return t("room.preparingDirectMatch");
   }
 };
 
-const getHostSetupSummary = (stage: string | null | undefined, sessionState: string | null | undefined): string => {
+const getHostSetupSummary = (
+  t: Translate,
+  stage: string | null | undefined,
+  sessionState: string | null | undefined
+): string => {
   if (sessionState === "expired") {
-    return "This direct link expired before setup finished. Start a new direct match from the lobby.";
+    return t("room.expiredLinkSummary");
   }
 
   switch (stage) {
     case "creating-offer":
     case "creating-session":
-      return "Creating your direct link now.";
+      return t("room.creatingDirectLinkNow");
     case "waiting-for-guest":
-      return "Waiting for a guest to open the direct link.";
+      return t("room.waitingForGuestToOpen");
     case "applying-answer":
-      return "Guest found. Finishing the browser-to-browser connection.";
+      return t("room.guestFoundFinishing");
     case "connected":
-      return "Guest connected. Loading the match.";
+      return t("room.guestConnectedLoading");
     case "failed":
-      return "Direct match setup failed. Start a new one from the lobby.";
+      return t("room.setupFailedStart");
     case "closed":
-      return "This direct match closed. Start a new one from the lobby.";
+      return t("room.matchClosedStart");
     default:
-      return "Preparing your direct match.";
+      return t("room.preparingYourDirectMatch");
   }
 };
 
-const getHostSetupDetails = (stage: string | null | undefined, sessionState: string | null | undefined): string => {
+const getHostSetupDetails = (
+  t: Translate,
+  stage: string | null | undefined,
+  sessionState: string | null | undefined
+): string => {
   if (sessionState === "expired") {
-    return "Expired setup links cannot be recovered. Live direct matches use separate reconnect recovery after both players connect.";
+    return t("room.expiredCannotRecover");
   }
 
   if (sessionState === "answered") {
-    return "A guest joined. The app is applying the connection automatically.";
+    return t("room.guestJoinedApplying");
   }
 
   if (sessionState === "finalized") {
-    return "Setup is finalized. Waiting for the direct channel to finish opening.";
+    return t("room.setupFinalizedWaiting");
   }
 
   switch (stage) {
     case "connected":
-      return "Room, match, chat, and rematch continue through the normal game client flow once the channel opens.";
+      return t("room.roomMatchChatContinue");
     case "failed":
     case "closed":
-      return "Use the lobby to create a fresh direct link if you still want to play.";
+      return t("room.useLobbyFreshLink");
     default:
-      return "Keep this tab open while your guest opens the shared link and joins from their browser.";
+      return t("room.keepTabOpenGuestOpens");
   }
 };
 
 export const RoomPage = () => {
+  const { t } = useTranslation();
   const { roomCode = "" } = useParams();
   const [inviteNotice, setInviteNotice] = useState<string | null>(null);
   const {
@@ -154,7 +167,7 @@ export const RoomPage = () => {
       await window.navigator.clipboard.writeText(value);
       setInviteNotice(successMessage);
     } catch {
-      setInviteNotice("Copy failed. Copy it manually from the screen.");
+      setInviteNotice(t("room.copyFailedManual"));
     }
   };
 
@@ -165,36 +178,37 @@ export const RoomPage = () => {
     return (
       <main className="page-shell room-page-shell">
         <section className="panel waiting-panel room-unavailable-panel">
-          <h1>Room unavailable</h1>
+          <h1>{t("room.roomUnavailable")}</h1>
           <p>
-            This browser is not currently attached to room <strong>{roomCode}</strong>.
+            {t("room.notAttachedPrefix")}<strong>{roomCode}</strong>{t("room.notAttachedSuffix")}
           </p>
           {showConflictGuidance && (
             <div className="conflict-guidance">
-              <p className="conflict-message">{error}</p>
+              <p className="conflict-message">{translateServerMessage(error)}</p>
               {isDisplacedError(error) && (
                 <p className="conflict-action">
-                  Another tab has claimed control. Close other tabs for this room, or reconnect to reclaim control.
+                  {t("room.anotherTabClaimed")}
                 </p>
               )}
               {isRecoveryUnavailableError(error) && (
                 <p className="conflict-action">
-                  Recovery data was cleared. You can start a fresh direct match from the lobby.
+                  {t("room.recoveryDataCleared")}
                 </p>
               )}
             </div>
           )}
           {showClaimVictory && (
             <div className="claim-victory-notice">
-              <p>{error}</p>
+              <p>{translateServerMessage(error)}</p>
             </div>
           )}
           {!showConflictGuidance && !showClaimVictory && (
             <p>
-              {error ??
-                (isP2PDeployment
-                  ? "Direct Match is reconnecting. If recovery does not finish, start a new match from the lobby."
-                  : "Create or join the room from the home page first.")}
+              {error !== null
+                ? translateServerMessage(error)
+                : isP2PDeployment
+                  ? t("room.p2pReconnecting")
+                  : t("room.createOrJoinFirst")}
             </p>
           )}
           <div className="waiting-action-row">
@@ -203,11 +217,11 @@ export const RoomPage = () => {
                 className="primary-button"
                 onClick={() => reconnect(roomCode)}
               >
-                Reconnect
+                {t("room.reconnectButton")}
               </button>
             )}
             <Link className="primary-button link-button" to="/lobby">
-              Go To Lobby
+              {t("room.goToLobby")}
             </Link>
           </div>
         </section>
@@ -220,7 +234,7 @@ export const RoomPage = () => {
       <main className="page-shell room-page-shell">
         {error ? (
           <section className="panel error-banner">
-            <p>{error}</p>
+            <p>{translateServerMessage(error)}</p>
           </section>
         ) : null}
 
@@ -248,72 +262,72 @@ export const RoomPage = () => {
 
   if (isP2PDeployment) {
     const directJoinLink = hostSetup?.joinUrl ?? null;
-    const hostStageLabel = formatSetupStage(hostSetup?.stage);
-    const hostSetupHeadline = getHostSetupHeadline(hostSetup?.stage);
-    const hostSetupSummary = getHostSetupSummary(hostSetup?.stage, hostSetup?.sessionState);
-    const hostSetupDetails = getHostSetupDetails(hostSetup?.stage, hostSetup?.sessionState);
+    const hostStageLabel = formatSetupStage(t, hostSetup?.stage);
+    const hostSetupHeadline = getHostSetupHeadline(t, hostSetup?.stage);
+    const hostSetupSummary = getHostSetupSummary(t, hostSetup?.stage, hostSetup?.sessionState);
+    const hostSetupDetails = getHostSetupDetails(t, hostSetup?.stage, hostSetup?.sessionState);
 
     return (
       <main className="page-shell home-page-shell room-page-shell">
         <section className="panel hero-panel lobby-panel waiting-lobby-panel">
           <div className="hero-copy">
-            <p className="eyebrow">Direct browser match</p>
-            <h1>Host Direct Match</h1>
+            <p className="eyebrow">{t("room.directBrowserMatch")}</p>
+            <h1>{t("roomLobby.hostDirectMatch")}</h1>
             <p>
-              Share one direct link with your guest. The app finishes setup automatically as soon as they join.
+              {t("room.shareOneLinkDesc")}
             </p>
           </div>
 
           <div className="lobby-stage waiting-lobby-stage">
             <LobbyPreviewPanel
-              title="Classic duel board"
+              title={t("common.classicDuelBoard")}
               badge="p2p"
               featurePills={[
-                "Browser to browser",
-                "Automated signaling",
-                `One comeback bomb at down ${MIN_BOMB_DEFICIT}+`
+                t("room.browserToBrowser"),
+                t("room.automatedSignaling"),
+                t("common.bombPill", { deficit: MIN_BOMB_DEFICIT })
               ]}
             />
 
             <section className="lobby-control-panel waiting-control-panel">
               <div className="lobby-identity-card waiting-summary-card">
                 <div className="lobby-card-heading">
-                  <h2>Host Setup</h2>
+                  <h2>{t("room.hostSetup")}</h2>
                   <span className={`lobby-connection-pill is-${connectionStatus}`}>
                     {hostStageLabel}
                   </span>
                 </div>
 
                 <div className="invite-room-readout invite-private-readout">
-                  <span className="invite-room-readout-label">Setup status</span>
+                  <span className="invite-room-readout-label">{t("room.setupStatus")}</span>
                   <strong>{hostStageLabel}</strong>
                 </div>
 
                 <div className="field lobby-field">
-                  <span>Room reference</span>
+                  <span>{t("room.roomReference")}</span>
                   <div className="invite-code-readonly">{roomCode}</div>
                 </div>
 
                 <p className="waiting-summary-copy">
-                  Keep this tab open. Live direct matches now recover after refresh, but this host tab still owns the match authority.
+                  {t("room.keepTabOpenOwnsAuthority")}
                 </p>
               </div>
 
               <div className="lobby-action-cards">
                 <div className="lobby-action-card is-create waiting-share-card">
                   <div className="lobby-card-heading">
-                    <h2>Share Direct Link</h2>
-                    <span>Send one short link to your guest.</span>
+                    <h2>{t("room.shareDirectLink")}</h2>
+                    <span>{t("room.sendOneShortLink")}</span>
                   </div>
 
                   {directJoinLink ? (
                     <div className="field lobby-field">
-                      <span>Direct join link</span>
+                      <span>{t("room.directJoinLink")}</span>
                       <textarea
                         className="signaling-payload-input"
                         value={directJoinLink}
                         readOnly
-                        aria-label="Direct join link"
+                        aria-label={t("room.directJoinLink")}
                       />
                     </div>
                   ) : null}
@@ -330,18 +344,18 @@ export const RoomPage = () => {
                       disabled={!directJoinLink}
                       onClick={() =>
                         directJoinLink
-                          ? copyInviteValue(directJoinLink, "Direct link copied.")
+                          ? copyInviteValue(directJoinLink, t("room.directLinkCopiedNotice"))
                           : undefined
                       }
                     >
-                      Copy Direct Link
+                      {t("room.copyDirectLink")}
                     </button>
                   </div>
 
                   <p className="waiting-share-copy">
                     {directJoinLink
-                      ? "Your guest only needs this link plus a display name to join."
-                      : "Creating the shareable direct link now."}
+                      ? t("room.guestOnlyNeedsLink")
+                      : t("room.creatingShareableLinkNow")}
                   </p>
                 </div>
 
@@ -352,8 +366,8 @@ export const RoomPage = () => {
                   </div>
 
                   <div className="invite-room-readout invite-private-readout">
-                    <span className="invite-room-readout-label">Signaling session</span>
-                    <strong>{hostSetup?.sessionState ?? "starting"}</strong>
+                    <span className="invite-room-readout-label">{t("room.signalingSession")}</span>
+                    <strong>{hostSetup?.sessionState ?? t("room.startingLower")}</strong>
                   </div>
 
                   <p className="waiting-room-copy">{hostSetupDetails}</p>
@@ -368,10 +382,10 @@ export const RoomPage = () => {
             </span>
             <span className="lobby-status-note">{hostSetupDetails}</span>
             <Link className="lobby-status-link" to="/lobby">
-              Back To Lobby
+              {t("common.backToLobby")}
             </Link>
-            {hostSetup?.error ? <span className="error-text">{hostSetup.error}</span> : null}
-            {error ? <span className="error-text">{error}</span> : null}
+            {hostSetup?.error ? <span className="error-text">{translateServerMessage(hostSetup.error)}</span> : null}
+            {error ? <span className="error-text">{translateServerMessage(error)}</span> : null}
           </div>
         </section>
       </main>
@@ -392,34 +406,33 @@ export const RoomPage = () => {
     <main className="page-shell home-page-shell room-page-shell">
       <section className="panel hero-panel lobby-panel waiting-lobby-panel">
         <div className="hero-copy">
-          <p className="eyebrow">MSN-style competitive minesweeper</p>
-          <h1>Minesweeper Flags</h1>
+          <p className="eyebrow">{t("roomLobby.eyebrow")}</p>
+          <h1>{t("roomLobby.title")}</h1>
           <p>
-            Room <strong>{roomCode}</strong> is ready. Share the private invite link and the match will begin as soon
-            as player two joins.
+            {t("room.roomIsReadyPrefix")}<strong>{roomCode}</strong>{t("room.roomIsReadySuffix")}
           </p>
         </div>
 
         <div className="lobby-stage">
           <LobbyPreviewPanel
-            title="Classic duel board"
-            badge="2 players"
+            title={t("common.classicDuelBoard")}
+            badge={t("common.twoPlayersBadge")}
             featurePills={[
-              "Shared 16x16 field",
-              "First to 26 mines",
-              `One comeback bomb at down ${MIN_BOMB_DEFICIT}+`
+              t("common.sharedField"),
+              t("common.firstTo26"),
+              t("common.bombPill", { deficit: MIN_BOMB_DEFICIT })
             ]}
           />
 
           <section className="lobby-control-panel">
             <div className="lobby-identity-card">
               <div className="lobby-card-heading">
-                <h2>Room Ready</h2>
-                <span className={`lobby-connection-pill is-${connectionStatus}`}>{connectionStatus}</span>
+                <h2>{t("room.roomReady")}</h2>
+                <span className={`lobby-connection-pill is-${connectionStatus}`}>{t(`common.${connectionStatus}`)}</span>
               </div>
 
               <div className="field lobby-field">
-                <span>Room reference</span>
+                <span>{t("room.roomReference")}</span>
                 <div className="invite-code-readonly">{roomCode}</div>
               </div>
             </div>
@@ -427,8 +440,8 @@ export const RoomPage = () => {
             <div className="lobby-action-cards">
               <div className="lobby-action-card is-create">
                 <div className="lobby-card-heading">
-                  <h2>Share This Room</h2>
-                  <span>Copy the private invite link. It already includes the token.</span>
+                  <h2>{t("room.shareThisRoom")}</h2>
+                  <span>{t("room.copyPrivateInvite")}</span>
                 </div>
 
                 <button
@@ -436,23 +449,23 @@ export const RoomPage = () => {
                   disabled={!inviteLink}
                   onClick={() =>
                     inviteLink
-                      ? copyInviteValue(inviteLink, "Invite link copied.")
+                      ? copyInviteValue(inviteLink, t("room.inviteLinkCopiedNotice"))
                       : undefined
                   }
                 >
-                  {inviteLink ? "Copy Invite Link" : "Invite Link Unavailable"}
+                  {inviteLink ? t("room.copyInviteLink") : t("room.inviteLinkUnavailable")}
                 </button>
               </div>
 
               <div className="lobby-action-card is-join">
                 <div className="lobby-card-heading">
-                  <h2>Copy Invite Token</h2>
-                  <span>{opponent ? "Guest connected." : "Manual fallback."}</span>
+                  <h2>{t("room.copyInviteTokenTitle")}</h2>
+                  <span>{opponent ? t("room.guestConnectedLabel") : t("room.manualFallback")}</span>
                 </div>
 
                 <div className="field lobby-field">
-                  <span>Invite token</span>
-                  <div className="invite-code-readonly invite-token-readonly">{inviteToken ?? "Unavailable"}</div>
+                  <span>{t("roomLobby.inviteTokenLabel")}</span>
+                  <div className="invite-code-readonly invite-token-readonly">{inviteToken ?? t("room.unavailable")}</div>
                 </div>
 
                 <button
@@ -466,11 +479,11 @@ export const RoomPage = () => {
                   disabled={!inviteToken}
                   onClick={() =>
                     inviteToken
-                      ? copyInviteValue(inviteToken, "Invite token copied.")
+                      ? copyInviteValue(inviteToken, t("room.inviteTokenCopiedNotice"))
                       : undefined
                   }
                 >
-                  {inviteToken ? "Copy Invite Token" : "Invite Token Unavailable"}
+                  {inviteToken ? t("room.copyInviteTokenTitle") : t("room.inviteTokenUnavailable")}
                 </button>
               </div>
             </div>
@@ -479,15 +492,16 @@ export const RoomPage = () => {
 
         <div className="status-strip lobby-status-strip">
           <span className="lobby-status-note">
-            {inviteNotice ?? (inviteLink ? "Waiting for player two." : "Invite link unavailable on this device.")}
+            {inviteNotice ?? (inviteLink ? t("room.waitingForPlayerTwo") : t("room.inviteLinkUnavailableDevice"))}
           </span>
           <span className="lobby-status-note">
-            Host: {host?.displayName ?? session.displayName}. {opponent ? `Guest joined as ${opponent.displayName}.` : "Guest slot is open."}
+            {t("room.hostLine", { name: host?.displayName ?? session.displayName })}{" "}
+            {opponent ? t("room.guestJoinedAs", { name: opponent.displayName }) : t("room.guestSlotOpen")}
           </span>
           <Link className="lobby-status-link" to="/lobby">
-            Back To Lobby
+            {t("common.backToLobby")}
           </Link>
-          {error ? <span className="error-text">{error}</span> : null}
+          {error ? <span className="error-text">{translateServerMessage(error)}</span> : null}
         </div>
       </section>
     </main>

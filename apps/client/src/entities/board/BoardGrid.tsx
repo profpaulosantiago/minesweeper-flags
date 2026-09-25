@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { MatchStateDto } from "@minesweeper-flags/shared";
 import { FlagIcon } from "../../shared-ui/FlagIcon.js";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
 import { getBombPreviewBounds } from "./bomb-preview.js";
 
 interface BoardGridProps {
@@ -44,6 +45,7 @@ export const BoardGrid = ({
   playerTones,
   onSelectCell
 }: BoardGridProps) => {
+  const { t } = useTranslation();
   const [hoveredCell, setHoveredCell] = useState<{ row: number; column: number } | null>(null);
   const shouldShowBombPreview = bombArmed && canAct && hoveredCell !== null;
   const previewBounds = hoveredCell
@@ -123,7 +125,7 @@ export const BoardGrid = ({
                 setHoveredCell(null);
               }
             }}
-            title={`Row ${cell.row + 1}, Column ${cell.column + 1}`}
+            title={t("board.cellTitle", { row: cell.row + 1, column: cell.column + 1 })}
           >
             {renderCellContent(
               cell.status,

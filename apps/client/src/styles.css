@@ -1864,3 +1864,33 @@ button {
     width: 100%;
   }
 }
+
+.language-switcher {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 40;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(82, 103, 135, 0.28);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(69, 83, 117, 0.18);
+}
+
+.language-switcher-button {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #52607f;
+  background: transparent;
+}
+
+.language-switcher-button.is-active {
+  color: #ffffff;
+  background: #3a4a6b;
+}

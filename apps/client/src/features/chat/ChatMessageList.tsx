@@ -1,5 +1,6 @@
 import type { ChatMessageDto } from "@minesweeper-flags/shared";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
 
 interface ChatMessageListProps {
   currentPlayerId: string;
@@ -46,6 +47,7 @@ export const ChatMessageList = ({
   playerTones,
   messages
 }: ChatMessageListProps) => {
+  const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement | null>(null);
   const shouldStickToBottomRef = useRef(true);
 
@@ -82,8 +84,8 @@ export const ChatMessageList = ({
   if (messages.length === 0) {
     return (
       <div className="chat-empty-state">
-        <p>No messages yet.</p>
-        <p>Start the conversation.</p>
+        <p>{t("chat.noMessagesYet")}</p>
+        <p>{t("chat.startConversation")}</p>
       </div>
     );
   }
@@ -104,7 +106,7 @@ export const ChatMessageList = ({
             ].join(" ")}
           >
             <header className="chat-message-meta">
-              <strong>{isSelf ? "You" : message.displayName}</strong>
+              <strong>{isSelf ? t("common.you") : message.displayName}</strong>
               <time dateTime={new Date(message.sentAt).toISOString()}>
                 {timeFormatter.format(message.sentAt)}
               </time>

@@ -1,4 +1,6 @@
 import type { ChatMessageDto } from "@minesweeper-flags/shared";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
+import { translateServerMessage } from "../../lib/i18n/i18n-store.js";
 import { ChatMessageList } from "./ChatMessageList.js";
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected";
@@ -33,23 +35,24 @@ export const ChatPanel = ({
   onDraftChange,
   onSend
 }: ChatPanelProps) => {
+  const { t } = useTranslation();
   const sendDisabled = connectionStatus !== "connected" || pending || !draft.trim();
   const statusMessage = error
-    ? error
+    ? translateServerMessage(error)
     : pending
-      ? "Sending..."
+      ? t("chat.sending")
       : connectionStatus !== "connected"
-        ? "Chat offline. You can keep typing."
-        : helperText ?? "Press Enter to send.";
+        ? t("chat.chatOffline")
+        : helperText ?? t("chat.pressEnterToSend");
 
   return (
     <section className={["classic-chat-frame", className].filter(Boolean).join(" ")}>
       <header className="chat-panel-header">
         <div>
-          <h2>Messenger</h2>
-          <span>Room {roomCode}</span>
+          <h2>{t("chat.messenger")}</h2>
+          <span>{t("common.roomLabel", { roomCode })}</span>
         </div>
-        <span className={`chat-connection-pill is-${connectionStatus}`}>{connectionStatus}</span>
+        <span className={`chat-connection-pill is-${connectionStatus}`}>{t(`common.${connectionStatus}`)}</span>
       </header>
 
       <ChatMessageList
@@ -71,11 +74,11 @@ export const ChatPanel = ({
         <input
           value={draft}
           disabled={pending}
-          placeholder="Type a message..."
+          placeholder={t("chat.typeMessage")}
           onChange={(event) => onDraftChange(event.target.value)}
         />
         <button type="submit" disabled={sendDisabled}>
-          Send
+          {t("chat.send")}
         </button>
       </form>
 

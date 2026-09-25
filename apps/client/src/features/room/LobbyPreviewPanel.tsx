@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
 
 const previewCells = [
   "hidden",
@@ -51,7 +52,10 @@ export const LobbyPreviewPanel = ({
   badge,
   featurePills = [],
   details
-}: LobbyPreviewPanelProps) => (
+}: LobbyPreviewPanelProps) => {
+  const { t } = useTranslation();
+
+  return (
   <section className="lobby-preview-card">
     <div className="lobby-preview-header">
       <span className="lobby-preview-title">{title}</span>
@@ -61,12 +65,12 @@ export const LobbyPreviewPanel = ({
     <div className="lobby-preview-window">
       <aside className="lobby-preview-sidebar">
         <div className="lobby-preview-sidebar-panel is-blue">
-          <strong>BLUE</strong>
-          <span>18 flags</span>
+          <strong>{t("common.blueLabel")}</strong>
+          <span>{t("lobbyPreview.flagsCount", { count: 18 })}</span>
         </div>
         <div className="lobby-preview-sidebar-panel is-red">
-          <strong>RED</strong>
-          <span>18 flags</span>
+          <strong>{t("common.redLabel")}</strong>
+          <span>{t("lobbyPreview.flagsCount", { count: 18 })}</span>
         </div>
       </aside>
 
@@ -96,4 +100,5 @@ export const LobbyPreviewPanel = ({
       </div>
     ) : null}
   </section>
-);
+  );
+};

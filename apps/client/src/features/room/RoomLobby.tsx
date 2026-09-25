@@ -2,6 +2,8 @@ import { INVITE_TOKEN_LENGTH, MIN_BOMB_DEFICIT } from "@minesweeper-flags/shared
 import { useEffect, useState } from "react";
 import type { SlotAvailability } from "../../app/providers/GameClientProvider.js";
 import type { DeploymentMode } from "../../lib/config/env.js";
+import { useTranslation } from "../../lib/i18n/useTranslation.js";
+import { translateServerMessage } from "../../lib/i18n/i18n-store.js";
 import { extractInviteToken } from "./invite-link.js";
 import { LobbyPreviewPanel } from "./LobbyPreviewPanel.js";
 
@@ -26,7 +28,8 @@ export const RoomLobby = ({
   onCreateRoom,
   onJoinRoom
 }: RoomLobbyProps) => {
-  const [displayName, setDisplayName] = useState("Captain Sweeper");
+  const { t } = useTranslation();
+  const [displayName, setDisplayName] = useState(t("common.captainSweeper"));
   const [inviteValue, setInviteValue] = useState(initialInviteValue);
   const trimmedDisplayName = displayName.trim();
   const inviteToken = extractInviteToken(inviteValue);
@@ -69,41 +72,38 @@ export const RoomLobby = ({
   return (
     <section className="panel hero-panel lobby-panel">
       <div className="hero-copy">
-        <p className="eyebrow">MSN-style competitive minesweeper</p>
-        <h1>Minesweeper Flags</h1>
-        <p>
-          Pick hidden squares on a shared 16x16 field. Mines are claimed for points,
-          safe squares reveal clues, and the first player to 26 flags wins.
-        </p>
+        <p className="eyebrow">{t("roomLobby.eyebrow")}</p>
+        <h1>{t("roomLobby.title")}</h1>
+        <p>{t("roomLobby.description")}</p>
       </div>
 
       <div className="lobby-stage">
         <LobbyPreviewPanel
-          title="Classic duel board"
-          badge="2 players"
+          title={t("common.classicDuelBoard")}
+          badge={t("common.twoPlayersBadge")}
           featurePills={[
-            "Shared 16x16 field",
-            "First to 26 mines",
-            `One comeback bomb at down ${MIN_BOMB_DEFICIT}+`
+            t("common.sharedField"),
+            t("common.firstTo26"),
+            t("common.bombPill", { deficit: MIN_BOMB_DEFICIT })
           ]}
         />
 
         <section className="lobby-control-panel">
           <div className="lobby-identity-card">
             <div className="lobby-card-heading">
-              <h2>Get Ready</h2>
+              <h2>{t("roomLobby.getReady")}</h2>
               <span className={`lobby-connection-pill is-${connectionStatus}`}>
-                {connectionStatus}
+                {t(`common.${connectionStatus}`)}
               </span>
             </div>
 
             <label className="field lobby-field">
-              <span>Display name</span>
+              <span>{t("common.displayNameLabel")}</span>
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
                 maxLength={20}
-                placeholder="Enter your display name"
+                placeholder={t("common.displayNamePlaceholder")}
               />
             </label>
           </div>
@@ -119,26 +119,26 @@ export const RoomLobby = ({
                   }}
                 >
                   <div className="lobby-card-heading">
-                    <h2>Host Direct Match</h2>
-                    <span>Create a browser-to-browser match and share one direct link.</span>
+                    <h2>{t("roomLobby.hostDirectMatch")}</h2>
+                    <span>{t("roomLobby.hostDirectMatchDesc")}</span>
                   </div>
 
                   <button
                     className="lobby-action-button lobby-create-button"
                     disabled={!canCreateRoom}
                   >
-                    Host Direct Match
+                    {t("roomLobby.hostDirectMatch")}
                   </button>
                 </form>
 
                 <div className="lobby-action-card is-join">
                   <div className="lobby-card-heading">
-                    <h2>Join Direct Match</h2>
-                    <span>Open the host's shared link to load the direct match automatically.</span>
+                    <h2>{t("roomLobby.joinDirectMatch")}</h2>
+                    <span>{t("roomLobby.joinDirectMatchDesc")}</span>
                   </div>
 
                   <p className="waiting-room-copy">
-                    Guests join from the host's direct link. Open that shared link in this browser to connect.
+                    {t("roomLobby.guestJoinCopy")}
                   </p>
 
                   <button
@@ -146,7 +146,7 @@ export const RoomLobby = ({
                     disabled
                     type="button"
                   >
-                    Join Direct Match
+                    {t("roomLobby.joinDirectMatch")}
                   </button>
                 </div>
               </>
@@ -161,31 +161,34 @@ export const RoomLobby = ({
                 >
                   <div className="lobby-card-heading">
                     <div className="lobby-card-heading-row">
-                      <h2>Create a Match</h2>
+                      <h2>{t("roomLobby.createAMatch")}</h2>
                       {slotAvailability !== null && (
                         <span className="lobby-slot-indicator">
                           <span className={`lobby-slot-pill${slotsFull ? " is-full" : ""}`}>
-                            {slotAvailability.activeRooms}/{slotAvailability.maxRooms} rooms
+                            {t("roomLobby.slotsCount", {
+                              active: slotAvailability.activeRooms,
+                              max: slotAvailability.maxRooms
+                            })}
                           </span>
                           <button
                             type="button"
                             className={`lobby-slot-refresh${refreshing ? " is-refreshing" : ""}`}
                             onClick={handleRefreshSlots}
-                            title="Refresh slot count"
+                            title={t("roomLobby.refreshSlotCount")}
                           >
                             &#x21bb;
                           </button>
                         </span>
                       )}
                     </div>
-                    <span>{slotsFull ? "All room slots are in use." : "Host a room and share a private invite link."}</span>
+                    <span>{slotsFull ? t("roomLobby.allSlotsInUse") : t("roomLobby.hostRoomShare")}</span>
                   </div>
 
                   <button
                     className="lobby-action-button lobby-create-button"
                     disabled={!canCreateRoom}
                   >
-                    Create Room
+                    {t("roomLobby.createRoom")}
                   </button>
                 </form>
 
@@ -197,18 +200,18 @@ export const RoomLobby = ({
                   }}
                 >
                   <div className="lobby-card-heading">
-                    <h2>Join by Token</h2>
-                    <span>Paste the invite token from another player.</span>
+                    <h2>{t("roomLobby.joinByToken")}</h2>
+                    <span>{t("roomLobby.joinByTokenDesc")}</span>
                   </div>
 
                   <label className="field lobby-field">
-                    <span>Invite token</span>
+                    <span>{t("roomLobby.inviteTokenLabel")}</span>
                     <input
                       className="invite-token-input"
                       value={inviteValue}
                       onChange={(event) => setInviteValue(event.target.value)}
                       maxLength={INVITE_TOKEN_LENGTH}
-                      placeholder="Paste invite token"
+                      placeholder={t("roomLobby.pasteInviteToken")}
                       spellCheck={false}
                       autoCapitalize="none"
                       autoCorrect="off"
@@ -225,7 +228,7 @@ export const RoomLobby = ({
                       .join(" ")}
                     disabled={!canJoinRoom}
                   >
-                    Join Match
+                    {t("roomLobby.joinMatch")}
                   </button>
                 </form>
               </>
@@ -235,17 +238,17 @@ export const RoomLobby = ({
       </div>
 
       <div className="status-strip lobby-status-strip">
-        <span className="lobby-status-note">No account needed. Open two tabs or invite a friend.</span>
+        <span className="lobby-status-note">{t("roomLobby.noAccountNeeded")}</span>
         {isP2PDeployment ? (
           <span className="lobby-status-note">
-            Direct matches stay in the browser. Hosts share one link and guests join from that link.
+            {t("roomLobby.directMatchesStayInBrowser")}
           </span>
         ) : !canJoinRoom ? (
-          <span className="lobby-status-note">Paste an invite token to unlock Join Match.</span>
+          <span className="lobby-status-note">{t("roomLobby.pasteInviteTokenToUnlock")}</span>
         ) : (
-          <span className="lobby-status-note">Invite looks valid. Press Join Match.</span>
+          <span className="lobby-status-note">{t("roomLobby.inviteLooksValid")}</span>
         )}
-        {error ? <span className="error-text">{error}</span> : null}
+        {error ? <span className="error-text">{translateServerMessage(error)}</span> : null}
       </div>
     </section>
   );
