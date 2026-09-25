@@ -1078,8 +1078,9 @@ button {
 
 .sidebar-player-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px;
+  gap: 2px 8px;
   padding: 7px 10px 2px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1087,12 +1088,15 @@ button {
 
 .sidebar-player-title {
   font-size: 0.9rem;
+  min-width: 0;
 }
 
 .sidebar-player-role {
   font-size: 0.62rem;
   opacity: 0.7;
   align-self: center;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .sidebar-player-avatar {
